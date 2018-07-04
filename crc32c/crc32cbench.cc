@@ -10,9 +10,9 @@
 using namespace logging;
 
 static const int TRIALS = 5;
-static const int ITERATIONS = 10;
+static const int ITERATIONS = 16;
 
-static const int BUFFER_MAX = 128 * 1024 * 1024;
+static const int BUFFER_MAX = 16 * 1024 * 1024;
 static const int ALIGNMENT = 8;
 
 struct CRC32CFunctionInfo {
