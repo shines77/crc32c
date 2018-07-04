@@ -172,3 +172,5 @@ uint32_t crc32c_hw_u64(uint32_t crc, const void * buf, size_t length)
 #ifdef ssize_t
 #undef ssize_t
 #endif
+
+// kate: indent-mode cstyle; indent-width 4; replace-tabs on; 
