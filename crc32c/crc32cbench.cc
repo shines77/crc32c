@@ -105,7 +105,7 @@ void runTest(const CRC32CFunctionInfo& fninfo, const char* buffer, int length, b
     }
     qsort(runTimes, TRIALS, sizeof(double), cmpDouble);
 // FT calculates the median value when TRIALS is an odd number    
-    printf("\t%.3f\n", 128.0 / runTimes[(TRIALS + 1) / 2 - 1]);
+    printf("\t%.3f\n", (double)BUFFER_MAX / (1024 * 1024) / runTimes[(TRIALS + 1) / 2 - 1]);
 }
 
 int main() {
