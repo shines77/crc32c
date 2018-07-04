@@ -11,7 +11,7 @@ else
   LBITS := $(shell getconf LONG_BIT)
 endif
 
-OBJECTS = crc32ctables.o crc32c.o stupidunit.o crc32intelc.o crc32inteltable.o crc32adler.o
+OBJECTS = crc32ctables.o crc32c.o crc32c_hw.o stupidunit.o crc32intelc.o crc32inteltable.o crc32adler.o
 
 ifeq ($(LBITS),64)
    OBJECTS += crc32intelasm.o crc_iscsi_v_pcl.o
