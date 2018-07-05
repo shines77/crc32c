@@ -202,7 +202,7 @@ uint32_t crc32c_hw_x86(uint32_t crc, const void * buf, size_t length)
     uint32_t crc32 = crc;
 
     const char * data = (const char *)buf;
-    const char * data_end = buf + length;
+    const char * data_end = (const char *)buf + length;
     ssize_t remain = length;
 
     do {
@@ -243,7 +243,7 @@ uint32_t crc32c_hw_x64(uint32_t crc, const void * buf, size_t length)
     uint64_t crc64 = crc;
 
     const char * data = (const char *)buf;
-    const char * data_end = buf + length;
+    const char * data_end = (const char *)buf + length;
     ssize_t remain = length;
 
     do {
