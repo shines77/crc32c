@@ -339,15 +339,15 @@ uint32_t crc32c_hw_u64(uint32_t crc, const void * buf, size_t length)
 #endif // CRC32_IS_X86_64
 }
 
-static uint64_t crc32c_combine_crc_u32(size_t block_size, uint32_t crc0, uint32_t crc1, uint32_t crc2, const uint64_t * next2) {
-    assert(block_size > 0 && block_size <= sizeof(crc32c_clmul_constants));
+static inline uint64_t crc32c_combine_crc_u32(size_t block_size, uint32_t crc0, uint32_t crc1, uint32_t crc2, const uint64_t * next2) {
+    assert(block_size > 0 && block_size <= (sizeof(crc32c_clmul_constants) / 2));
     const __m128i multiplier = _mm_loadu_si128(reinterpret_cast<const __m128i *>(crc32c_clmul_constants) + block_size - 1);
-    const __m128i crc0_xmm = _mm_set_epi32(0, 0, 0, crc0);
+    const __m128i crc0_xmm = _mm_cvtsi32_si128((int32_t)crc0);
     const __m128i result0  = _mm_clmulepi64_si128(crc0_xmm, multiplier, 0x00);
-    const __m128i crc1_xmm = _mm_set_epi32(0, 0, 0, crc1);
+    const __m128i crc1_xmm = _mm_cvtsi32_si128((int32_t)crc1);
     const __m128i result1  = _mm_clmulepi64_si128(crc1_xmm, multiplier, 0x10);
     const __m128i result   = _mm_xor_si128(result0, result1);
-    const __m128i __next2  = _mm_loadu_si128(reinterpret_cast<const __m128i *>((uint64_t *)next2 - 1));
+    const __m128i __next2  = _mm_loadu_si128(reinterpret_cast<const __m128i *>((uint64_t *)next2 - 2));
     const __m128i result64 = _mm_xor_si128(result, __next2);
     uint32_t crc0_low  = _mm_cvtsi128_si32(result64);
     uint32_t crc32     = _mm_crc32_u32(crc2, crc0_low);
@@ -362,15 +362,15 @@ static uint64_t crc32c_combine_crc_u32(size_t block_size, uint32_t crc0, uint32_
  * crc32c_combine_crc() performs pclmulqdq multiplication of 2 partial CRC's and a well
  * chosen constant and xor's these with the remaining CRC.
  */
-static uint64_t crc32c_combine_crc_u64(size_t block_size, uint64_t crc0, uint64_t crc1, uint64_t crc2, const uint64_t * next2) {
-    assert(block_size > 0 && block_size <= sizeof(crc32c_clmul_constants));
+static inline uint64_t crc32c_combine_crc_u64(size_t block_size, uint64_t crc0, uint64_t crc1, uint64_t crc2, const uint64_t * next2) {
+    assert(block_size > 0 && block_size <= (sizeof(crc32c_clmul_constants) / 2));
     const __m128i multiplier = _mm_loadu_si128(reinterpret_cast<const __m128i *>(crc32c_clmul_constants) + block_size - 1);
-    const __m128i crc0_xmm = _mm_set_epi64x(0, crc0);
+    const __m128i crc0_xmm = _mm_cvtsi64_si128((int64_t)crc0);
     const __m128i result0  = _mm_clmulepi64_si128(crc0_xmm, multiplier, 0x00);
-    const __m128i crc1_xmm = _mm_set_epi64x(0, crc1);
+    const __m128i crc1_xmm = _mm_cvtsi64_si128((int64_t)crc1);
     const __m128i result1  = _mm_clmulepi64_si128(crc1_xmm, multiplier, 0x10);
     const __m128i result   = _mm_xor_si128(result0, result1);
-    crc0 = _mm_cvtsi128_si64(result);
+    crc0 = (uint64_t)_mm_cvtsi128_si64(result);
     crc0 = crc0 ^ *((uint64_t *)next2 - 1);
     uint64_t crc32 = _mm_crc32_u64(crc2, crc0);
     return crc32;
@@ -417,17 +417,17 @@ static inline uint32_t __crc32c_hw_u64(const char * data, size_t length, uint32_
     size_t data_len = length;
 
     size_t unaligned = ((kAlignment - (size_t)src8) & (kAlignment - 1));
-    if (unlikely(unaligned != 0)) {
+    if (likely(unaligned != 0)) {
         length -= unaligned;
-        if (unaligned & 0x04U) {
+        if (likely(unaligned & 0x04U)) {
             crc32 = _mm_crc32_u32(crc32, *(uint32_t *)src8);
             src8 += sizeof(uint32_t);
         }
-        if (unaligned & 0x02U) {
+        if (likely(unaligned & 0x02U)) {
             crc32 = _mm_crc32_u16(crc32, *(uint16_t *)src8);
             src8 += sizeof(uint16_t);
         }
-        if (unaligned & 0x01U) {
+        if (likely(unaligned & 0x01U)) {
             crc32 = _mm_crc32_u8(crc32, *(uint8_t *)src8);
             src8 += sizeof(uint8_t);
         }
@@ -444,11 +444,11 @@ static inline uint32_t __crc32c_hw_u64(const char * data, size_t length, uint32_
         uint64_t crc2 = 0;
 
         size_t block_size;
-        ssize_t loops = (ssize_t)(length / kLoopSize);
+        size_t loops = length / kLoopSize;
         length = length % kLoopSize;
         
         while (likely(loops > 0)) {
-            block_size = ((size_t)loops >= kMaxBlockSize) ? kMaxBlockSize : (size_t)loops;
+            block_size = (likely(loops >= kMaxBlockSize)) ? kMaxBlockSize : loops;
 
             uint64_t * next0 = src;
             uint64_t * next1 = src + 1 * block_size;
@@ -456,7 +456,7 @@ static inline uint32_t __crc32c_hw_u64(const char * data, size_t length, uint32_
 
             size_t loop = block_size;
 
-            do {
+            while (likely(loop > 0)) {
                 crc0 = _mm_crc32_u64(crc0, *next0);
                 crc1 = _mm_crc32_u64(crc1, *next1);
                 crc2 = _mm_crc32_u64(crc2, *next2);
@@ -464,7 +464,7 @@ static inline uint32_t __crc32c_hw_u64(const char * data, size_t length, uint32_
                 ++next1;
                 ++next2;
                 --loop;
-            } while (likely(loop > 0));
+            }
 
             crc0 = crc32c_combine_crc_u64(block_size, crc0, crc1, crc2, next2);
             crc1 = crc2 = 0;
@@ -499,15 +499,15 @@ static inline uint32_t __crc32c_hw_u64(const char * data, size_t length, uint32_
     size_t remain = (size_t)(src8_end - src8);
     assert(remain >= 0 && remain < kStepSize);
     if (likely(remain != 0)) {
-        if (remain & 0x04U) {
+        if (likely(remain & 0x04U)) {
             crc32 = _mm_crc32_u32(crc32, *(uint32_t *)src8);
             src8 += sizeof(uint32_t);
         }
-        if (remain & 0x02U) {
+        if (likely(remain & 0x02U)) {
             crc32 = _mm_crc32_u16(crc32, *(uint16_t *)src8);
             src8 += sizeof(uint16_t);
         }
-        if (remain & 0x01U) {
+        if (likely(remain & 0x01U)) {
             crc32 = _mm_crc32_u8(crc32, *(uint8_t *)src8);
             src8 += sizeof(uint32_t);
         }
