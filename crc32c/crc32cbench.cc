@@ -34,11 +34,11 @@ static const CRC32CFunctionInfo FNINFO[] = {
     MAKE_FN_STRUCT(crc32cIntelC),
 
 #if __SSE4_2__
-    MAKE_FN_STRUCT(crc32c_hw_u32),
 #ifdef CRC32_IS_X86_64
     MAKE_FN_STRUCT(crc32c_hw_u64),
     MAKE_FN_STRUCT(crc32c_hw_x64),
 #endif // CRC32_IS_X86_64
+    MAKE_FN_STRUCT(crc32c_hw),
 #endif // __SSE4_2__
 };
 #undef MAKE_FN_STRUCT
