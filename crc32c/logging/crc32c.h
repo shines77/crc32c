@@ -74,6 +74,7 @@ uint32_t crc32c_hw_x86(uint32_t crc, const void * data, size_t length);
 uint32_t crc32c_hw_x64(uint32_t crc, const void * data, size_t length);
 uint32_t crc32c_hw_u32(uint32_t crc, const void * data, size_t length);
 uint32_t crc32c_hw_u64(uint32_t crc, const void * data, size_t length);
+uint32_t crc32c_hw(uint32_t crc_init, const char * data, size_t length);
 
 }  // namespace logging
 #endif

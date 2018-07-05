@@ -510,7 +510,7 @@ static inline uint32_t __crc32c_hw_u64(const char * data, size_t length, uint32_
 
 #endif // CRC32C_IS_X86_64
 
-static uint32_t crc32c_hw(uint32_t crc_init, const char * data, size_t length)
+uint32_t crc32c_hw(uint32_t crc_init, const char * data, size_t length)
 {
 #if CRC32C_IS_X86_64
     return __crc32c_hw_u64(data, length, crc_init);
