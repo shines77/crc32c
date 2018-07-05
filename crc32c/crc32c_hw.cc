@@ -517,6 +517,7 @@ static uint32_t crc32c_hw(uint32_t crc_init, const char * data, size_t length)
 #else
     return __crc32c_hw_u32(data, length, crc_init);
 #endif
+}
 
 #endif // __SSE4_2__
 
