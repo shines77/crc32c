@@ -13,7 +13,7 @@
 #endif
 
 #if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
- || defined(__amd64__) || defined(__x86_64__)
+ || defined(__amd64__) || defined(__x86_64__) || defined(__LP64__)
 #ifndef CRC32_IS_X86_64
 #define CRC32_IS_X86_64     1
 #endif
@@ -74,7 +74,7 @@ uint32_t crc32c_hw_x86(uint32_t crc, const void * data, size_t length);
 uint32_t crc32c_hw_x64(uint32_t crc, const void * data, size_t length);
 uint32_t crc32c_hw_u32(uint32_t crc, const void * data, size_t length);
 uint32_t crc32c_hw_u64(uint32_t crc, const void * data, size_t length);
-uint32_t crc32c_hw(uint32_t crc_init, const void * data, size_t length);
+uint32_t crc32c_hw(uint32_t crc, const void * data, size_t length);
 
 }  // namespace logging
 #endif

@@ -10,6 +10,7 @@
 #ifdef __SSE4_2__
 #ifdef _MSC_VER
 #include <nmmintrin.h>  // For SSE 4.2
+#include <wnmmintrin.h>  // For SSE 4.2
 #else
 #include <x86intrin.h>
 //#include <nmmintrin.h>  // For SSE 4.2
@@ -19,6 +20,13 @@
 #ifndef ssize_t
 #define ssize_t ptrdiff_t
 #endif
+
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__LP64__)
+#ifndef CRC32C_IS_X86_64
+#define CRC32C_IS_X86_64     1
+#endif
+#endif // _WIN64 || __amd64__
 
 #ifndef __has_attribute
 #define CRC32C_HAS_ATTRIBUTE(x)     0
