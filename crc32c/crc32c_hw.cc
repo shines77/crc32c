@@ -121,7 +121,7 @@ namespace logging {
 // Numbers taken directly from intel white-paper.
 //
 // clang-format off
-alignas(16)
+//alignas(16)
 static const uint64_t crc32c_clmul_constants[] = {
     0x14cd00bd6ULL, 0x105ec76f0ULL, 0x0ba4fc28eULL, 0x14cd00bd6ULL,
     0x1d82c63daULL, 0x0f20c0dfeULL, 0x09e4addf8ULL, 0x0ba4fc28eULL,
@@ -333,7 +333,7 @@ uint32_t crc32c_hw_u64(uint32_t crc, const void * buf, size_t length)
 
 static uint64_t crc32c_combine_crc_u32(size_t block_size, uint32_t crc0, uint32_t crc1, uint32_t crc2, const uint64_t * next2) {
     assert(block_size > 0 && block_size <= sizeof(crc32c_clmul_constants));
-    const __m128i multiplier = _mm_load_si128(reinterpret_cast<const __m128i *>(crc32c_clmul_constants) + block_size - 1);
+    const __m128i multiplier = _mm_loadu_si128(reinterpret_cast<const __m128i *>(crc32c_clmul_constants) + block_size - 1);
     const __m128i crc0_xmm = _mm_set_epi32(0, 0, 0, crc0);
     const __m128i result0  = _mm_clmulepi64_si128(crc0_xmm, multiplier, 0x00);
     const __m128i crc1_xmm = _mm_set_epi32(0, 0, 0, crc1);
@@ -356,7 +356,7 @@ static uint64_t crc32c_combine_crc_u32(size_t block_size, uint32_t crc0, uint32_
  */
 static uint64_t crc32c_combine_crc_u64(size_t block_size, uint64_t crc0, uint64_t crc1, uint64_t crc2, const uint64_t * next2) {
     assert(block_size > 0 && block_size <= sizeof(crc32c_clmul_constants));
-    const __m128i multiplier = _mm_load_si128(reinterpret_cast<const __m128i *>(crc32c_clmul_constants) + block_size - 1);
+    const __m128i multiplier = _mm_loadu_si128(reinterpret_cast<const __m128i *>(crc32c_clmul_constants) + block_size - 1);
     const __m128i crc0_xmm = _mm_set_epi64x(0, crc0);
     const __m128i result0  = _mm_clmulepi64_si128(crc0_xmm, multiplier, 0x00);
     const __m128i crc1_xmm = _mm_set_epi64x(0, crc1);
