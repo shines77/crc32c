@@ -449,6 +449,7 @@ static inline uint32_t __crc32c_hw_u64(const char * data, size_t length, uint32_
         
         while (likely(loops > 0)) {
             block_size = (likely(loops >= kMaxBlockSize)) ? kMaxBlockSize : loops;
+            assert(block_size >= 1);
 
             uint64_t * next0 = src;
             uint64_t * next1 = src + 1 * block_size;
@@ -456,6 +457,7 @@ static inline uint32_t __crc32c_hw_u64(const char * data, size_t length, uint32_
 
             size_t loop = block_size;
 
+            size_t loop = block_size - 1;
             while (likely(loop > 0)) {
                 crc0 = _mm_crc32_u64(crc0, *next0);
                 crc1 = _mm_crc32_u64(crc1, *next1);
@@ -465,6 +467,12 @@ static inline uint32_t __crc32c_hw_u64(const char * data, size_t length, uint32_
                 ++next2;
                 --loop;
             }
+
+            crc0 = _mm_crc32_u64(crc0, *next0);
+            crc1 = _mm_crc32_u64(crc1, *next1);
+            ++next0;
+            ++next1;
+            ++next2;
 
             crc0 = crc32c_combine_crc_u64(block_size, crc0, crc1, crc2, next2);
             crc1 = crc2 = 0;
